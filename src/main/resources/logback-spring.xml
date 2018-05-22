@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<include
+		resource="org/springframework/boot/logging/logback/base.xml" />
+	<property name="LOG_FILE" value="logs/mybootapplication.log" />
+	<property name="FILE_LOG_PATTERN"
+		value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %d %-5level %logger{36} - %msg%n [%X{api-client-ip} -%X{api-request-method}]" />
+
+	<springProfile name="dev,test,default">
+		<include
+			resource="org/springframework/boot/logging/logback/console-appender.xml" />
+		<appender name="ROLLING-FILE"
+			class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<encoder>
+				<pattern>${FILE_LOG_PATTERN}</pattern>
+			</encoder>
+			<file>${LOG_FILE}</file>
+			<rollingPolicy
+				class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+				<timeBasedFileNamingAndTriggeringPolicy
+					class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+					<maxFileSize>10MB</maxFileSize>
+				</timeBasedFileNamingAndTriggeringPolicy>
+			</rollingPolicy>
+		</appender>
+
+		<!-- apender for logback kafka appender -->
+
+		<appender name="asyncTaskLogKafka"
+			class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+			<appender name="kafkaVerboseAppender"
+				class="com.github.danielwegener.logback.kafka.KafkaAppender">
+				<encoder
+					class="com.github.danielwegener.logback.kafka.encoding.LayoutKafkaMessageEncoder">
+					<layout class="ch.qos.logback.classic.PatternLayout">
+						<pattern>task_logs-%msg</pattern>
+					</layout>
+				</encoder>
+				<topic>manish-test</topic>
+				<keyingStrategy
+					class="com.github.danielwegener.logback.kafka.keying.RoundRobinKeyingStrategy" />
+				<deliveryStrategy
+					class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+				<producerConfig>bootstrap.servers=localhost:9092</producerConfig>
+				<producerConfig>retries=2</producerConfig>
+			</appender>
+			<appender-ref ref="CONSOLE"/>
+			</appender>
+		
+
+		<!-- -->
+
+		<root level="INFO">
+			<appender-ref ref="CONSOLE" />
+			<appender-ref ref="ROLLING-FILE" />
+			<appender-ref ref="asyncTaskLogKafka" />
+		</root>
+		<logger name="com.tech.boot.myclient" level="DEBUG">
+			<appender-ref ref="CONSOLE" />
+			<appender-ref ref="ROLLING-FILE" />
+			<appender-ref ref="asyncTaskLogKafka" />
+		</logger>
+		<logger name="org.apache.kafka" level="WARN">
+			<appender-ref ref="CONSOLE" />
+			<appender-ref ref="ROLLING-FILE" />
+			<appender-ref ref="asyncTaskLogKafka" />
+		</logger>
+	</springProfile>
+
+
+
+	<springProfile name="prod">
+		<appender name="ROLLING-FILE"
+			class="ch.qos.logback.core.rolling.RollingFileAppender">
+			<encoder>
+				<pattern>${FILE_LOG_PATTERN}</pattern>
+			</encoder>
+			<file>${LOG_FILE}</file>
+			<rollingPolicy
+				class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+				<fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+				<timeBasedFileNamingAndTriggeringPolicy
+					class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+					<maxFileSize>10MB</maxFileSize>
+				</timeBasedFileNamingAndTriggeringPolicy>
+			</rollingPolicy>
+		</appender>
+
+		<root level="ERROR">
+			<appender-ref ref="ROLLING-FILE" />
+		</root>
+		<logger name="com.tech.boot.myclient" level="DEBUG">
+			<appender-ref ref="CONSOLE" />
+			<appender-ref ref="ROLLING-FILE-1" />
+		</logger>
+	</springProfile>
+
+</configuration>

@@ -1,0 +1,40 @@
+server:
+  servlet:
+    context-path: /myclient
+  port: 6062
+api:
+  geturl:
+    url: http://localhost:6060/myapi/getEmployees
+    description: my url to fetch all employees
+  posturl:
+    url: http://localhost:6060/myapi/addEmployee
+myclient:
+  scheduler:
+    cron: 0 47 07 1/1 * ?
+    zone: GMT+5:30
+    
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/XE
+    username: CLOUDCOMPILERR-DB
+    password: admin
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    hikari:
+      connection-test-query: SELECT 1 FROM DUAL
+      connection-timeout: 60000
+      maximum-pool-size: 5
+      auto-commit: true
+      jdbc4-connection-test: true
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle10gDialect
+    properties:
+      hibernate:
+        show_sql: true
+        temp.use_jdbc_metadata_defaults: false
+        use_sql_comments: true
+        format_sql: true
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+      
+        
