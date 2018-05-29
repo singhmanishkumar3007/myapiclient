@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tech.boot.myclient.annotations.MyAnnotation;
 import com.tech.boot.myclient.config.APIConfigs;
 import com.tech.boot.myclient.constants.LogConstants;
@@ -148,6 +150,12 @@ public class EmployeeClient {
 		Employee employee = null;
 
 		employee = employeeService.getEmployeeByQuery(empName);
+		try {
+			LOGGER.info("employee retrieved is {}",new ObjectMapper().writeValueAsString(employee));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return employee;
 	}
